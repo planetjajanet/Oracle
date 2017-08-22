@@ -1,0 +1,220 @@
+1. 
+//I named it department1 because there is already a table called department
+create table department1 (
+department_id number primary key,
+department_name varchar(30),
+department_block_number number
+);
+ 
+2.
+create table student (
+student_id number primary key,
+student_name varchar(30),
+address varchar(40),
+city varchar(30),
+department_id number,
+Foreign key (department_id)
+references department1(department_id)
+  );
+
+3.
+create table staff (
+  staff_id number primary key,       
+  //I made staff_id a primary key because in question 4, I can't make staff_id a foreign key unless the staff_id in staff table is a primary key
+  staff_name varchar(30),
+  department_id number,
+  Foreign key (department_id)
+  references department1(department_id)
+);
+
+4.
+create table subject (
+  subject_id number primary key,
+  subject_name varchar(30),
+  subject_code varchar(10),
+  staff_id number,
+  foreign key (staff_id)
+  references staff(staff_id)
+  );
+
+5.
+create table mark (
+  value1 number,
+  subject_id number primary key,
+  foreign key (subject_id)
+  references subject(subject_id),
+  student_id number,
+  foreign key (student_id)
+  references student(student_id)
+);
+
+6.
+ALTER table staff modify (staff_name not null);
+
+7.
+alter table student add emailid varchar(20);
+
+8.
+alter table student modify email varchar(50);
+
+9. alter table drop column emailid;
+
+10 & 11. Imported
+
+12.
+update Subject set subject_name='Computer Science', subject_code=1919 where subject_id='8';
+
+13.
+delete from subject where SUBJECT_NAME='Accounting';
+
+14.
+select department_name from department1 order  by department_name asc;
+
+15.
+select department_name from department1 where department_block_number >=3 and DEPARTMENT_BLOCK_NUMBER <=10;
+
+16.
+select student_name from student order by student_name asc;
+
+17.
+SELECT student_name from student where city in ('Chicago', 'Taylor', 'San Jose') order by student_id asc;
+
+18.
+select address, city from student address_student;
+
+19.
+select student_name from student where length(STUDENT_NAME)=6;
+
+20.
+select department_block_number from department1 order by department_block_number asc;
+select count(*) "Total" from department1;
+
+21. 
+select count(student_name) as stud_count from student;
+
+22.
+
+23.
+select student.student_name, subject.subject_name from student cross join subject where subject.subject_code >1600;
+
+24.
+select student.student_name, subject.subject_name from student, subject, mark  where student.student_id=mark.student_id and subject.subject_id = mark.subject_id and mark.value1 <3;
+
+25.
+
+26.
+select staff.staff_name from staff, subject where staff.staff_id = subject.staff_id and staff.staff_id not in subject.staff_id order by staff.staff_name asc;
+
+27.
+create or replace function find_dept_name(department_id number)
+return varchar is deptname varchar(30);
+begin
+  select department_name into deptname from department1 where department_id>0;
+  return deptname;
+end;
+
+28.
+create or replace function find_dept_block(department_id number)
+return number is deptblock number;
+begin
+  select department_block_number into deptblock from department1 where department_id>0;
+  return deptblock;
+end;
+
+29.
+create or replace function find_staff_name(staff_id number)
+return varchar is staffname varchar(30);
+begin
+  select staff_name into staffname from staff where staff_id>0;
+  return staffname;
+end;
+
+30.
+create or replace trigger trigger_department_af_update
+after update
+on department1
+for each row
+
+begin
+insert into department1_updatecopy
+values (
+  :new.department_id,
+  :new.department_name,
+  :new.department_block_number
+);
+dbms_output.put_line('Departments table has been updated');
+
+end;
+
+
+31.
+create or replace trigger trigger_department_bf_delete
+before delete
+on department1
+for each row
+
+begin
+  insert into department1_copy
+  values
+  (:old.department_id,
+  :old.department_name,
+  :old.departmet_block_number
+  );
+dbms_output.put_line('Departments table has been updated');
+
+end;
+/
+
+32.
+create index b_students
+on student(INSTR(student_name,'b'));
+
+33.
+create view view_staff as
+select staff_name
+from staff;
+
+34.
+declare
+c_id STUDENT.STUDENT_ID%type;
+c_name STUDENT.STUDENT_NAME%type;
+c_addr STUDENT.ADDRESS%type;
+c_city STUDENT.CITY%type;
+c_deptid STUDENT.DEPARTMENT_ID%type;
+cursor c_student is select student_id, student_name, address, city, department_id from student;
+
+begin 
+  open c_student;
+  loop
+  fetch c_student into c_id, c_name, c_addr, c_city, c_deptid;
+    exit when c_student%notfound;
+    dbms_output.put_line(c_id || ' ' || c_name || ' ' || c_addr || ' ' || c_city || ' ' || c_deptid);
+  end loop;
+  close c_student;
+end;
+
+35.
+create package college as procedure select_departments(department.department_id%type);
+
+function select_student(student.department_id number)
+  return varchar;
+end;
+
+36.
+create or replace package body college as 
+
+procedure select_student (c_id student_id%type, c_name student_name%type)
+is begin
+select student_id, student_name into c_student from student;
+dbms_output.put_line(student_id || ' ' || student_name);
+end select_student;
+
+procedure select_department(department_id number, department_name varchar, department_block_number number) 
+as
+begin
+  select department_id, department_name, department_block_number
+  from department1;
+  dbms_output.put_line(department_id || ' ' || department_name || ' ' || department_block_number);
+  end select_department;
+end college;
+
